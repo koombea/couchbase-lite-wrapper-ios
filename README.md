@@ -31,7 +31,7 @@ dependencies: [
 Create a couchbase database for each of the models you want to store
 
 ```swift
-couchbaseDataBase = CouchbaseDatabase(databaseName: "User")
+couchbaseDatabase = CouchbaseDatabase(databaseName: "User")
 
 ```
 
@@ -39,7 +39,7 @@ couchbaseDataBase = CouchbaseDatabase(databaseName: "User")
 
 ```swift
 let document = CouchbaseDocument(id: "1", attributes: ["name": "Brad", "last_name": "Depp"])
-couchbaseDataBase.save(document)
+couchbaseDatabase.save(document)
 
 ```
 
@@ -47,7 +47,7 @@ couchbaseDataBase.save(document)
 
 ```swift
 let expression = Expression.property("attributes.name").equalTo(Expression.string("Brad"))
-let documents = couchbaseDataBase.fetchAll(whereExpression: expression)
+let documents = couchbaseDatabase.fetchAll(whereExpression: expression)
 
 ```
 
@@ -55,7 +55,7 @@ let documents = couchbaseDataBase.fetchAll(whereExpression: expression)
 
 ```swift
 let expression = Expression.property("attributes.name").equalTo(Expression.string("Brad"))
-couchbaseDataBase.deleteAll(whereExpression: expression)
+couchbaseDatabase.deleteAll(whereExpression: expression)
 
 ```
 
@@ -65,7 +65,7 @@ couchbaseDataBase.deleteAll(whereExpression: expression)
 Having a `User: Codable` model, you can fetch models like this:
 
 ```swift
-let users = couchbaseDataBase.fetchAll(User.self)
+let users = couchbaseDatabase.fetchAll(User.self)
 
 ```
 
@@ -76,6 +76,6 @@ let users = couchbaseDataBase.fetchAll(User.self)
 Having a `User: Mappable` model, you can fetch models like this:
 
 ```swift
-let users = couchbaseDataBase.fetchAll(User.self)
+let users = couchbaseDatabase.fetchAll(User.self)
 
 ```
