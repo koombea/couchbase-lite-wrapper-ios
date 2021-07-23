@@ -1,7 +1,7 @@
 import XCTest
 import CouchbaseLiteSwift
 import Nimble
-@testable import CouchbaseWrapper
+@testable import CouchbaseLiteWrapper
     
 final class CouchbaseWrapperTests: XCTestCase {
     

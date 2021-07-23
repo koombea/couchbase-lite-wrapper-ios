@@ -1,6 +1,6 @@
 //
-//  CouchbaseCodable.swift
-//  CouchBaseWrapper
+//  CouchbaseObjectMapper.swift
+//  CouchBaseLiteWrapper
 //
 // Copyright (c) 2021 Koombea, Inc All rights reserved.
 //
@@ -19,43 +19,43 @@
 
 import Foundation
 import CouchbaseLiteSwift
+import ObjectMapper
+
+public extension Mappable {
+        
+    /// Use this get a document from a Mapple object.
+    /// - Parameters:
+    ///   - id: The id of the document.
+    /// - Returns: A couchbase document
+    func toDocument(withID id: String) -> CouchbaseDocument? {
+        return CouchbaseDocument(id: id, attributes: toJSON())
+    }
+}
 
 public extension CouchbaseDatabase {
     
-    //MARK: - Fetch
-    
     /// Use this method to fetch stored documents.
     /// - Parameters:
-    ///   - type: The 'Codable' generic.
+    ///   - type: The 'Mappable' generic.
     ///   - expressionProtocol: The 'where' expression to filter specific documents.
     ///   - orderedBy: Sort criteria for the query.
-    /// - Returns: An Array of 'Codable' objects.
-    func fetchAll<T: Codable>(_ type: T.Type, whereExpression expressionProtocol: ExpressionProtocol? = nil,
+    /// - Returns: An Array of 'Mappable' objects.
+    func fetchAll<T: Mappable>(_ type: T.Type, whereExpression expressionProtocol: ExpressionProtocol? = nil,
                                 orderedBy: [OrderingProtocol]? = nil) -> [T] {
         let documents = fetchAll(whereExpression: expressionProtocol, orderedBy: orderedBy)
         let JSONArray = documents.compactMap { $0.attributes }
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: JSONArray, options: .prettyPrinted)
-            let decoder = JSONDecoder()
-            return try decoder.decode([T].self, from: jsonData)
-        } catch {
-            return []
-        }
+        return Mapper<T>().mapArray(JSONArray: JSONArray)
     }
     
     /// Use this method to fetch a single document.
     /// - Parameters:
-    ///   - type: The 'Codable' type.
-    ///   - documentID: The id of the document to fetch..
+    ///   - type: The 'Mappable' type.
+    ///   - documentID: The id of the document to fetch.
     /// - Returns: A 'Mappable' object.
-    func fetch<T: Codable>(_ type: T.Type, documentID: String) -> T? {
+    func fetch<T: Mappable>(_ type: T.Type, documentID: String) -> T? {
         guard let JSONObject = fetch(withDocumentID: documentID)?.attributes else { return nil }
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: JSONObject, options: .prettyPrinted)
-            let decoder = JSONDecoder()
-            return try decoder.decode(T.self, from: jsonData)
-        } catch {
-            return nil
-        }
+        return Mapper<T>().map(JSONObject: JSONObject)
     }
 }
+
+

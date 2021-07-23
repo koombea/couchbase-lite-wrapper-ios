@@ -1,6 +1,6 @@
 //
 //  User.swift
-//  CouchBaseWrapper
+//  CouchBaseLiteWrapper
 //
 // Copyright (c) 2021 Koombea, Inc All rights reserved.
 //
