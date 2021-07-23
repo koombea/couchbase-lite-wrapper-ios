@@ -1,0 +1,52 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "CouchbaseLiteSwift",
+        "repositoryURL": "https://github.com/couchbase/couchbase-lite-ios.git",
+        "state": {
+          "branch": null,
+          "revision": "862a079791dc8b269bfd44e227c43eb35c1a3cdb",
+          "version": "2.8.4"
+        }
+      },
+      {
+        "package": "CwlCatchException",
+        "repositoryURL": "https://github.com/mattgallagher/CwlCatchException.git",
+        "state": {
+          "branch": null,
+          "revision": "682841464136f8c66e04afe5dbd01ab51a3a56f2",
+          "version": "2.1.0"
+        }
+      },
+      {
+        "package": "CwlPreconditionTesting",
+        "repositoryURL": "https://github.com/mattgallagher/CwlPreconditionTesting.git",
+        "state": {
+          "branch": null,
+          "revision": "02b7a39a99c4da27abe03cab2053a9034379639f",
+          "version": "2.0.0"
+        }
+      },
+      {
+        "package": "Nimble",
+        "repositoryURL": "https://github.com/Quick/Nimble.git",
+        "state": {
+          "branch": null,
+          "revision": "af1730dde4e6c0d45bf01b99f8a41713ce536790",
+          "version": "9.2.0"
+        }
+      },
+      {
+        "package": "ObjectMapper",
+        "repositoryURL": "https://github.com/tristanhimmelman/ObjectMapper.git",
+        "state": {
+          "branch": null,
+          "revision": "0b96a734de3ea1c87374ae677064f86adb0716ec",
+          "version": "4.2.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
