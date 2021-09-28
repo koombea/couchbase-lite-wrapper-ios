@@ -48,6 +48,20 @@ public class CouchbaseDatabase {
         database = try? Database(name: configuration.databaseName, config: databaseConfiguration)
     }
     
+    // MARK: - Index
+    
+    /// Use this method to a couchbase index
+    /// - Parameters:
+    ///   - index: The specific index to be created.
+    ///   - name: The index name.
+    public func createIndex(_ index: CouchbaseLiteSwift.Index, withName name: String) {
+        do {
+            try database?.createIndex(index, withName: name)
+        } catch let error {
+            print(error)
+        }
+    }
+    
     //MARK: - Save/Create
     
     /// Use this method to save a single document.

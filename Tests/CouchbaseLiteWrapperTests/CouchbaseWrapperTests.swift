@@ -27,6 +27,34 @@ final class CouchbaseWrapperTests: XCTestCase {
         expect(couchbaseDatabase.database).notTo(beNil())
     }
     
+    func test_CreateIndex() {
+        var documents: [CouchbaseDocument] = []
+        documents.append(CouchbaseDocument(id: "1", attributes: ["name": "Brad", "last_name": "Depp"]))
+        documents.append(CouchbaseDocument(id: "2", attributes: ["name": "Charles", "last_name": "Xavier"]))
+        documents.append(CouchbaseDocument(id: "3", attributes: ["name": "Brian", "last_name": "Brandon"]))
+        couchbaseDatabase?.save(documents)
+        
+        let index = IndexBuilder.fullTextIndex(items: [FullTextIndexItem.property("attributes.name"),
+                                                       FullTextIndexItem.property("attributes.last_name")]).ignoreAccents(true)
+        
+        couchbaseDatabase?.createIndex(index, withName: "NameLastNameFTSIndex")
+        
+        let expression = FullTextExpression.index("NameLastNameFTSIndex").match("*\("Br")*")
+        let orderedBy = Ordering.property("attributes.name").ascending()
+        let JSONArray = couchbaseDatabase?.fetchAll(User.self, whereExpression: expression, orderedBy: [orderedBy])
+        
+        let count = JSONArray?.count ?? 0
+        expect(count).to(equal(2))
+        guard count > 2 else { return }
+        let firstUser = JSONArray?[0]
+        let secondUser = JSONArray?[1]
+        expect(firstUser).notTo(beNil())
+        expect(secondUser).notTo(beNil())
+        
+        expect(firstUser?.name).to(equal("Brad"))
+        expect(secondUser?.name).to(equal("Brian"))
+    }
+    
     func test_saveDocument() {
         let document = CouchbaseDocument(id: "1", attributes: ["name": "Brad", "last_name": "Depp"])
         couchbaseDatabase?.save(document)
