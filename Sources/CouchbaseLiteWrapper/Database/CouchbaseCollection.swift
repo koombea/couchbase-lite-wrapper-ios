@@ -67,7 +67,7 @@ public struct CouchbaseCollection {
     /// - Parameters:
     ///   - expressionProtocol: The 'where' expression to filter specific documents.
     ///   - orderedBy: Sort criteria for the query.
-    /// - Returns: Documents of the current database.
+    /// - Returns: Documents of the current collection.
     public func fetchAll(whereExpression expressionProtocol: ExpressionProtocol? = nil,
                          orderedBy: [OrderingProtocol]? = nil) throws -> [CouchbaseDocument] {
         guard let collection else { throw ResponseError.invalidCollection }
@@ -89,11 +89,11 @@ public struct CouchbaseCollection {
     /// Use this method to fetch a single document.
     /// - Parameters:
     ///   - documentID: The id of the document to fetch.
-    /// - Returns: Document of the current database.
+    /// - Returns: Document of the current collection.
     public func fetch(withDocumentID documentID: String) throws -> CouchbaseDocument? {
         guard let collection else { throw ResponseError.invalidCollection }
-        let databaseDocument = try collection.document(id: documentID)
-        guard let dictionary = databaseDocument?.toDictionary() else { return nil }
+        let document = try collection.document(id: documentID)
+        guard let dictionary = document?.toDictionary() else { return nil }
         return CouchbaseDocument(dictionary: dictionary)
     }
     
