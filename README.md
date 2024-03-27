@@ -68,14 +68,3 @@ Having a `User: Codable` model, you can fetch models like this:
 let users = couchbaseDatabase.fetchAll(User.self)
 
 ```
-
-## Couchbase Lite Wrapper + ObjectMapper
-
-[ObjectMapper](https://github.com/tristanhimmelman/ObjectMapper) is a framework written in Swift that makes it easy for you to convert your model objects (classes and structs) to and from JSON.
-
-Having a `User: Mappable` model, you can fetch models like this:
-
-```swift
-let users = couchbaseDatabase.fetchAll(User.self)
-
-```
