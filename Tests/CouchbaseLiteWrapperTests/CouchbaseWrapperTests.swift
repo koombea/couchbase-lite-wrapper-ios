@@ -10,7 +10,7 @@ final class CouchbaseWrapperTests: XCTestCase {
     
     override func setUp() {
         couchbaseDatabase = CouchbaseDatabase(databaseName: "couchbase-db")
-        if let database = couchbaseDatabase?.database {
+        if let database = couchbaseDatabase {
             couchbaseCollection = CouchbaseCollection(collection: "User", database: database)
         }
     }

@@ -25,9 +25,9 @@ public struct CouchbaseCollection {
     private var database: Database?
     private var collection: Collection?
     
-    public init(collection: String, database: Database) {
-        self.database = database
-        self.collection = try? database.createCollection(name: collection)
+    public init(collection: String, database: CouchbaseDatabase) {
+        self.database = database.database
+        self.collection = try? self.database?.createCollection(name: collection)
     }
     
     // MARK: - Index
