@@ -18,24 +18,8 @@
 //
 
 import Foundation
-import ObjectMapper
 
-internal struct User: Mappable {
-    
-    var name: String?
-    var lastName: String?
-    
-    init?(map: Map) {
-        
-    }
-    
-    mutating func mapping(map: Map) {
-        name <- map["name"]
-        lastName <- map["last_name"]
-    }
-}
-
-internal struct UserCodable: Codable {
+internal struct User: Codable {
     
     var name: String
     var lastName: String

@@ -18,10 +18,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         .package(name: "CouchbaseLiteSwift",
                  url: "https://github.com/couchbase/couchbase-lite-ios.git",
-                 .upToNextMajor(from: "2.8.0")),
-        .package(name: "ObjectMapper",
-                url: "https://github.com/tristanhimmelman/ObjectMapper.git",
-                .upToNextMajor(from: "4.2.0")),
+                 .upToNextMajor(from: "3.0.0")),
         .package(name: "Nimble",
                 url: "https://github.com/Quick/Nimble.git",
                 .upToNextMajor(from: "9.2.0")),
@@ -31,9 +28,9 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "CouchbaseLiteWrapper",
-            dependencies: ["ObjectMapper", "CouchbaseLiteSwift"]),
+            dependencies: ["CouchbaseLiteSwift"]),
         .testTarget(
             name: "CouchbaseLiteWrapperTests",
-            dependencies: ["CouchbaseLiteWrapper", "Nimble", "CouchbaseLiteSwift", "ObjectMapper"]),
+            dependencies: ["CouchbaseLiteWrapper", "Nimble", "CouchbaseLiteSwift"]),
     ]
 )

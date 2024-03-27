@@ -20,7 +20,7 @@
 import Foundation
 import CouchbaseLiteSwift
 
-public extension CouchbaseDatabase {
+public extension CouchbaseCollection {
     
     //MARK: - Fetch
     
@@ -31,8 +31,8 @@ public extension CouchbaseDatabase {
     ///   - orderedBy: Sort criteria for the query.
     /// - Returns: An Array of 'Codable' objects.
     func fetchAll<T: Codable>(_ type: T.Type, whereExpression expressionProtocol: ExpressionProtocol? = nil,
-                                orderedBy: [OrderingProtocol]? = nil) -> [T] {
-        let documents = fetchAll(whereExpression: expressionProtocol, orderedBy: orderedBy)
+                                orderedBy: [OrderingProtocol]? = nil) throws -> [T] {
+        let documents = try fetchAll(whereExpression: expressionProtocol, orderedBy: orderedBy)
         let JSONArray = documents.compactMap { $0.attributes }
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: JSONArray, options: .prettyPrinted)
@@ -48,8 +48,8 @@ public extension CouchbaseDatabase {
     ///   - type: The 'Codable' type.
     ///   - documentID: The id of the document to fetch..
     /// - Returns: A 'Mappable' object.
-    func fetch<T: Codable>(_ type: T.Type, documentID: String) -> T? {
-        guard let JSONObject = fetch(withDocumentID: documentID)?.attributes else { return nil }
+    func fetch<T: Codable>(_ type: T.Type, documentID: String) throws -> T? {
+        guard let JSONObject = try fetch(withDocumentID: documentID)?.attributes else { return nil }
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: JSONObject, options: .prettyPrinted)
             let decoder = JSONDecoder()

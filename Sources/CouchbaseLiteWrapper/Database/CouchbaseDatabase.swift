@@ -20,10 +20,10 @@
 import Foundation
 import CouchbaseLiteSwift
 
-public class CouchbaseDatabase {
+public struct CouchbaseDatabase {
     
     private var configuration: CouchbaseDatabaseConfiguration
-    internal var database: Database?
+    private(set) var database: Database?
     
     public init(databaseName: String) {
         configuration = CouchbaseDatabaseConfiguration(databaseName: databaseName)
@@ -35,129 +35,20 @@ public class CouchbaseDatabase {
         setup()
     }
     
-    private func setup() {
-        let databaseConfiguration = DatabaseConfiguration()
+    private mutating func setup() {
+        var databaseConfiguration = DatabaseConfiguration()
         if let appGroupIdentifier = configuration.appGroupIdentifier,
            let sharedContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) {
             let dbURL = sharedContainerURL.appendingPathComponent(configuration.databaseName)
             if !FileManager.default.fileExists(atPath: dbURL.path) {
-                try? FileManager.default.createDirectory(atPath: dbURL.path, withIntermediateDirectories: false, attributes: nil)
+                try? FileManager.default.createDirectory(
+                    atPath: dbURL.path,
+                    withIntermediateDirectories: false,
+                    attributes: nil
+                )
             }
             databaseConfiguration.directory = sharedContainerURL.relativePath
         }
         database = try? Database(name: configuration.databaseName, config: databaseConfiguration)
     }
-    
-    // MARK: - Index
-    
-    /// Use this method to a couchbase index
-    /// - Parameters:
-    ///   - index: The specific index to be created.
-    ///   - name: The index name.
-    public func createIndex(_ index: CouchbaseLiteSwift.Index, withName name: String) {
-        do {
-            try database?.createIndex(index, withName: name)
-        } catch let error {
-            print(error)
-        }
-    }
-    
-    //MARK: - Save/Create
-    
-    /// Use this method to save a single document.
-    /// - Parameters:
-    ///   - document: The specific document to be saved.
-    public func save(_ document: CouchbaseDocument) {
-        do {
-            try database?.saveDocument(document.mutableDocument)
-        } catch let error {
-            print(error)
-        }
-    }
-    
-    /// Use this method to save a single document.
-    /// - Parameters:
-    ///   - document: The specific document to be saved.
-    public func save(_ documents: [CouchbaseDocument]) {
-        try? database?.inBatch {
-            documents.forEach { save($0) }
-        }
-    }
-    
-    //MARK: - Fetch
-    
-    /// Use this method to fetch stored documents.
-    /// - Parameters:
-    ///   - expressionProtocol: The 'where' expression to filter specific documents.
-    ///   - orderedBy: Sort criteria for the query.
-    /// - Returns: Documents of the current database.
-    public func fetchAll(whereExpression expressionProtocol: ExpressionProtocol? = nil,
-                         orderedBy: [OrderingProtocol]? = nil) -> [CouchbaseDocument] {
-        guard let database = database else { return [] }
-        var query: Query = QueryBuilder.select(SelectResult.all())
-                            .from(DataSource.database(database))
-        if let fromQuery = query as? From {
-            if let expressionProtocol = expressionProtocol {
-                query = fromQuery.where(expressionProtocol)
-                if let whereQuery = query as? Where, let orderedBy = orderedBy { query = whereQuery.orderBy(orderedBy) }
-            } else if let orderedBy = orderedBy {
-                query = fromQuery.orderBy(orderedBy)
-            }
-        }
-        return fetchQuery(query)
-    }
-    
-    /// Use this method to fetch a single document.
-    /// - Parameters:
-    ///   - documentID: The id of the document to fetch.
-    /// - Returns: Document of the current database.
-    public func fetch(withDocumentID documentID: String) -> CouchbaseDocument? {
-        let databaseDocument = database?.document(withID: documentID)
-        guard let dictionary = databaseDocument?.toDictionary() else { return nil }
-        return CouchbaseDocument(dictionary: dictionary)
-    }
-    
-    //MARK: - Delete
-    
-    /// Use this method to delete stored documents.
-    /// - Parameters:
-    ///   - expressionProtocol: The 'where' expression to delete specific documents.
-    public func deleteAll(whereExpression expressionProtocol: ExpressionProtocol? = nil) {
-        guard let database = database else { return }
-        var query: Query = QueryBuilder.select(SelectResult.all())
-                            .from(DataSource.database(database))
-        if let fromQuery = query as? From {
-            if let expressionProtocol = expressionProtocol {
-                query = fromQuery.where(expressionProtocol)
-            }
-        }
-        try? database.inBatch {
-            fetchQuery(query).forEach { delete(withDocumentID: $0.id) }
-        }
-    }
-    
-    /// Use this method to delete a single document.
-    /// - Parameters:
-    ///   - documentID: The id of the document to delete.
-    public func delete(withDocumentID documentID: String) {
-        guard let databaseDocument = database?.document(withID: documentID) else { return }
-        do {
-            try database?.deleteDocument(databaseDocument)
-        } catch { }
-    }
-    
-    //MARK: - Private
-    
-    private func fetchQuery(_ query: Query) -> [CouchbaseDocument] {
-        var documents: [CouchbaseDocument] = []
-        do {
-            for resultSet in try query.execute() {
-                if let dictionary = resultSet.dictionary(forKey: configuration.databaseName)?.toDictionary() {
-                    documents.append(CouchbaseDocument(dictionary: dictionary))
-                }
-            }
-        } catch { }
-        return documents
-    }
 }
-

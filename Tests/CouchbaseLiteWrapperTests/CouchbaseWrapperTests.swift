@@ -6,22 +6,27 @@ import Nimble
 final class CouchbaseWrapperTests: XCTestCase {
     
     var couchbaseDatabase: CouchbaseDatabase?
+    var couchbaseCollection: CouchbaseCollection?
     
     override func setUp() {
-        couchbaseDatabase = CouchbaseDatabase(databaseName: "User")
+        couchbaseDatabase = CouchbaseDatabase(databaseName: "couchbase-db")
+        if let database = couchbaseDatabase?.database {
+            couchbaseCollection = CouchbaseCollection(collection: "User", database: database)
+        }
     }
     
     override func tearDown() {
-        couchbaseDatabase?.deleteAll()
+        try? couchbaseCollection?.deleteAll()
     }
     
     func test_databaseSetup_withDatabaseName() {
         expect(self.couchbaseDatabase).notTo(beNil())
         expect(self.couchbaseDatabase?.database).notTo(beNil())
+        expect(self.couchbaseCollection).notTo(beNil())
     }
     
     func test_databaseSetup_withConfiguration() {
-        let databaseConfiguration = CouchbaseDatabaseConfiguration(databaseName: "User")
+        let databaseConfiguration = CouchbaseDatabaseConfiguration(databaseName: "couchbase-db")
         let couchbaseDatabase = CouchbaseDatabase(configuration: databaseConfiguration)
         expect(couchbaseDatabase).notTo(beNil())
         expect(couchbaseDatabase.database).notTo(beNil())
@@ -32,16 +37,16 @@ final class CouchbaseWrapperTests: XCTestCase {
         documents.append(CouchbaseDocument(id: "1", attributes: ["name": "Brad", "last_name": "Depp"]))
         documents.append(CouchbaseDocument(id: "2", attributes: ["name": "Charles", "last_name": "Xavier"]))
         documents.append(CouchbaseDocument(id: "3", attributes: ["name": "Brian", "last_name": "Brandon"]))
-        couchbaseDatabase?.save(documents)
+        try? couchbaseCollection?.save(documents)
         
         let index = IndexBuilder.fullTextIndex(items: [FullTextIndexItem.property("attributes.name"),
                                                        FullTextIndexItem.property("attributes.last_name")]).ignoreAccents(true)
         
-        couchbaseDatabase?.createIndex(index, withName: "NameLastNameFTSIndex")
+        try? couchbaseCollection?.createIndex(index, withName: "NameLastNameFTSIndex")
         
-        let expression = FullTextExpression.index("NameLastNameFTSIndex").match("*\("Br")*")
+        let expression = FullTextFunction.match(Expression.fullTextIndex("NameLastNameFTSIndex"), query: "*\("Br")*")
         let orderedBy = Ordering.property("attributes.name").ascending()
-        let JSONArray = couchbaseDatabase?.fetchAll(User.self, whereExpression: expression, orderedBy: [orderedBy])
+        let JSONArray = try? couchbaseCollection?.fetchAll(User.self, whereExpression: expression, orderedBy: [orderedBy])
         
         let count = JSONArray?.count ?? 0
         expect(count).to(equal(2))
@@ -57,8 +62,8 @@ final class CouchbaseWrapperTests: XCTestCase {
     
     func test_saveDocument() {
         let document = CouchbaseDocument(id: "1", attributes: ["name": "Brad", "last_name": "Depp"])
-        couchbaseDatabase?.save(document)
-        let documents = couchbaseDatabase?.fetchAll()
+        try? couchbaseCollection?.save(document)
+        let documents = try? couchbaseCollection?.fetchAll()
         expect(documents?.first).notTo(beNil())
     }
     
@@ -66,8 +71,8 @@ final class CouchbaseWrapperTests: XCTestCase {
         var documents: [CouchbaseDocument] = []
         documents.append(CouchbaseDocument(id: "1", attributes: ["name": "Brad", "last_name": "Depp"]))
         documents.append(CouchbaseDocument(id: "2", attributes: ["name": "Charles", "last_name": "Xavier"]))
-        couchbaseDatabase?.save(documents)
-        let count = couchbaseDatabase?.fetchAll().count ?? 0
+        try? couchbaseCollection?.save(documents)
+        let count = try? couchbaseCollection?.fetchAll().count ?? 0
         expect(count).to(equal(2))
     }
     
@@ -75,9 +80,9 @@ final class CouchbaseWrapperTests: XCTestCase {
         var documents: [CouchbaseDocument] = []
         documents.append(CouchbaseDocument(id: "1", attributes: ["name": "Brad", "last_name": "Depp"]))
         documents.append(CouchbaseDocument(id: "2", attributes: ["name": "Charles", "last_name": "Xavier"]))
-        couchbaseDatabase?.save(documents)
+        try? couchbaseCollection?.save(documents)
         let expression = Expression.property("attributes.name").equalTo(Expression.string("Brad"))
-        let document = couchbaseDatabase?.fetchAll(whereExpression: expression).first
+        let document = try? couchbaseCollection?.fetchAll(whereExpression: expression).first
         expect(document).notTo(beNil())
         let name = (document?.attributes?["name"] as? String) ?? ""
         expect(name).to(equal("Brad"))
@@ -87,9 +92,9 @@ final class CouchbaseWrapperTests: XCTestCase {
         var documents: [CouchbaseDocument] = []
         documents.append(CouchbaseDocument(id: "1", attributes: ["name": "Brad", "last_name": "Depp"]))
         documents.append(CouchbaseDocument(id: "2", attributes: ["name": "Charles", "last_name": "Xavier"]))
-        couchbaseDatabase?.save(documents)
+        try? couchbaseCollection?.save(documents)
         let expression = Expression.property("attributes.name").equalTo(Expression.string("Brad"))
-        let user = couchbaseDatabase?.fetchAll(User.self, whereExpression: expression).first
+        let user = try? couchbaseCollection?.fetchAll(User.self, whereExpression: expression).first
         expect(user?.name).to(equal("Brad"))
         expect(user?.lastName).to(equal("Depp"))
     }
@@ -98,8 +103,8 @@ final class CouchbaseWrapperTests: XCTestCase {
         var documents: [CouchbaseDocument] = []
         documents.append(CouchbaseDocument(id: "1", attributes: ["name": "Brad", "last_name": "Depp"]))
         documents.append(CouchbaseDocument(id: "2", attributes: ["name": "Charles", "last_name": "Xavier"]))
-        couchbaseDatabase?.save(documents)
-        let document = couchbaseDatabase?.fetch(withDocumentID: "1")
+        try? couchbaseCollection?.save(documents)
+        let document = try? couchbaseCollection?.fetch(withDocumentID: "1")
         let name = (document?.attributes?["name"] as? String) ?? ""
         expect(name).to(equal("Brad"))
     }
@@ -108,8 +113,8 @@ final class CouchbaseWrapperTests: XCTestCase {
         var documents: [CouchbaseDocument] = []
         documents.append(CouchbaseDocument(id: "1", attributes: ["name": "Brad", "last_name": "Depp"]))
         documents.append(CouchbaseDocument(id: "2", attributes: ["name": "Charles", "last_name": "Xavier"]))
-        couchbaseDatabase?.save(documents)
-        let user = couchbaseDatabase?.fetch(User.self, documentID: "1")
+        try? couchbaseCollection?.save(documents)
+        let user = try? couchbaseCollection?.fetch(User.self, documentID: "1")
         expect(user?.name).to(equal("Brad"))
         expect(user?.lastName).to(equal("Depp"))
     }
@@ -118,8 +123,8 @@ final class CouchbaseWrapperTests: XCTestCase {
         var documents: [CouchbaseDocument] = []
         documents.append(CouchbaseDocument(id: "1", attributes: ["name": "Brad", "last_name": "Depp"]))
         documents.append(CouchbaseDocument(id: "2", attributes: ["name": "Charles", "last_name": "Xavier"]))
-        couchbaseDatabase?.save(documents)
-        let user = couchbaseDatabase?.fetch(UserCodable.self, documentID: "1")
+        try? couchbaseCollection?.save(documents)
+        let user = try? couchbaseCollection?.fetch(User.self, documentID: "1")
         expect(user?.name).to(equal("Brad"))
         expect(user?.lastName).to(equal("Depp"))
     }
@@ -128,10 +133,10 @@ final class CouchbaseWrapperTests: XCTestCase {
         var documents: [CouchbaseDocument] = []
         documents.append(CouchbaseDocument(id: "1", attributes: ["name": "Brad", "last_name": "Depp"]))
         documents.append(CouchbaseDocument(id: "2", attributes: ["name": "Charles", "last_name": "Xavier"]))
-        couchbaseDatabase?.save(documents)
+        try? couchbaseCollection?.save(documents)
         let expression = Expression.property("attributes.name").equalTo(Expression.string("Brad"))
-        couchbaseDatabase?.deleteAll(whereExpression: expression)
-        let document = couchbaseDatabase?.fetchAll(whereExpression: expression).first
+        try? couchbaseCollection?.deleteAll(whereExpression: expression)
+        let document = try? couchbaseCollection?.fetchAll(whereExpression: expression).first
         expect(document).to(beNil())
     }
     
@@ -139,9 +144,9 @@ final class CouchbaseWrapperTests: XCTestCase {
         var documents: [CouchbaseDocument] = []
         documents.append(CouchbaseDocument(id: "1", attributes: ["name": "Brad", "last_name": "Depp"]))
         documents.append(CouchbaseDocument(id: "2", attributes: ["name": "Charles", "last_name": "Xavier"]))
-        couchbaseDatabase?.save(documents)
-        couchbaseDatabase?.delete(withDocumentID: "1")
-        let savedDocuments = couchbaseDatabase?.fetchAll()
+        try? couchbaseCollection?.save(documents)
+        try? couchbaseCollection?.delete(withDocumentID: "1")
+        let savedDocuments = try? couchbaseCollection?.fetchAll()
         expect(savedDocuments?.count).to(equal(1))
         let name = (savedDocuments?.first?.attributes?["name"] as? String) ?? ""
         expect(name).to(equal("Charles"))
@@ -151,10 +156,9 @@ final class CouchbaseWrapperTests: XCTestCase {
         var documents: [CouchbaseDocument] = []
         documents.append(CouchbaseDocument(id: "1", attributes: ["name": "Brad", "last_name": "Depp"]))
         documents.append(CouchbaseDocument(id: "2", attributes: ["name": "Charles", "last_name": "Xavier"]))
-        couchbaseDatabase?.save(documents)
-        couchbaseDatabase?.deleteAll()
-        let count = couchbaseDatabase?.fetchAll().count
+        try? couchbaseCollection?.save(documents)
+        try? couchbaseCollection?.deleteAll()
+        let count = try? couchbaseCollection?.fetchAll().count
         expect(count).to(equal(0))
     }
-    
 }

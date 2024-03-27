@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/couchbase/couchbase-lite-ios.git",
         "state": {
           "branch": null,
-          "revision": "862a079791dc8b269bfd44e227c43eb35c1a3cdb",
-          "version": "2.8.4"
+          "revision": "949cc5e652250dbd7d1549b91ee02defcb8bfa9c",
+          "version": "3.1.6"
         }
       },
       {
@@ -35,15 +35,6 @@
           "branch": null,
           "revision": "af1730dde4e6c0d45bf01b99f8a41713ce536790",
           "version": "9.2.0"
-        }
-      },
-      {
-        "package": "ObjectMapper",
-        "repositoryURL": "https://github.com/tristanhimmelman/ObjectMapper.git",
-        "state": {
-          "branch": null,
-          "revision": "0b96a734de3ea1c87374ae677064f86adb0716ec",
-          "version": "4.2.0"
         }
       }
     ]
